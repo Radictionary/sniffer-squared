@@ -10,8 +10,5 @@ def write_to_runfile(data):
 shutdown = partial(write_to_runfile, "false")
 start    = partial(write_to_runfile, "true")
 
-def send_notification(title, notification):
-    notification = Notify()
-    notification.title = title
-    notification.message = notification
-    notification.send()
+def send_notification(title, message, urgency="normal"):
+    Notify(title, message, "S²", urgency).send()

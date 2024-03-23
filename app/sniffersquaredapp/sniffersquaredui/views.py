@@ -12,7 +12,8 @@ from .backend import (
 
 from functools import wraps
 
-# Create your views here.
+# possible upgrades:
+# - page for about.html rejecting the request because users already exist.
 
 default_context = dict(
     nav_items=[
@@ -20,13 +21,14 @@ default_context = dict(
         {"url": "/history/", "title": "History"},
         {"url": "/shutdown/", "title": "Shutdown"},
         {"url": "/start/", "title": "Start"},
+        {"url": "/about/", "title": "About"},
     ],
 )
 
 def make_context(**kwargs):
     return default_context | kwargs
 
-def favicon(request):
+def favicon(_):
     return redirect("/static/favicon.ico")
 
 def no_users_exist():
@@ -41,6 +43,14 @@ def only_on_startup(func):
         else:
             return redirect("/")
     return wrapper
+
+@login_required
+def about(request):
+    return render(
+        request,
+        "about.html",
+        context=make_context(title="About")
+    )
 
 @only_on_startup
 def create_super_user_view(request):
@@ -111,4 +121,6 @@ routes = [
     ('start/', start_view),
     ('create_superuser/', create_super_user_view),
     ('accounts/profile/', redirect_to_index),
+    ('about/', about),
+    # ('favicon.ico', favicon),
 ]

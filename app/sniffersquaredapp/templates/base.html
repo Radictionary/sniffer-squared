@@ -14,15 +14,18 @@
 <body>
     <!-- Simple Bootstrap navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand ms-4" href="#">S²</a>
+        <a class="navbar-brand ms-4" href="#">
+            <img src="/static/sniffersquaredui/favicon.ico" width="30" height="30" alt="">
+        </a>
+        <a class="navbar-brand ms-1" href="#">S² | Network Sniffer Detection Platform</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ml-auto">
+        <div class="collapse navbar-collapse justify-content-end me-4" id="navbarSupportedContent">
+            <ul class="navbar-nav">
                 {% for item in nav_items %}
-                    <li class="nav-item">
+                    <li class="nav-item me-3">
                         <a class="nav-link" href="{{ item.url }}">{{ item.title }}</a>
                     </li>
                 {% endfor %}
@@ -31,11 +34,9 @@
         </nav>
 
     
-    <div class="container m-5 p-4 border rounded">
-        {% block content %}
-        <h1>Base.html</h1>
-        {% endblock content %}
-    </div>
+    {% block content %}
+    <h1>Base.html</h1>
+    {% endblock content %}
 
     
 
