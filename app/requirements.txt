@@ -1,0 +1,6 @@
+asgiref==3.8.1
+Django==5.0.3
+jeepney==0.8.0
+loguru==0.6.0
+notify-py==0.3.42
+sqlparse==0.4.4
