@@ -17,6 +17,9 @@ default_context = dict(
 def make_context(**kwargs):
     return default_context | kwargs
 
+def favicon(request):
+    return redirect("/static/favicon.ico")
+
 @login_required
 def index(request):
     return render(

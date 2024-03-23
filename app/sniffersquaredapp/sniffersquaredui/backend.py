@@ -1,9 +1,10 @@
-def shutdown():
-    # assume run from folder adjacent to
-    # python manage.py
-    with open("../../packet_pool/run.txt") as f:
-        f.write("false")
+from functools import partial
 
-def start():
-    with open("../../packet_pool/run.txt") as f:
-        f.write("true")
+RUN_FILE_PATH = "../../packet_pool/run.txt"
+
+def write_to_runfile(data):
+    with open(RUN_FILE_PATH) as f:
+        f.write(data)
+
+shutdown = partial(write_to_runfile, "false")
+start    = partial(write_to_runfile, "true")
