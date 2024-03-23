@@ -41,6 +41,8 @@ def process_packet(packet):
             print("Destination IP:", packet[IP].dst)
             print("Packet Info:", packet.summary())
             print("---------------------------------------------")
+            return True
+    return False
 
 
 # Sniff network traffic and process packets
