@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Create Superuser</h1>
+
+<div class="container border rounded p-3 m-5">
+    <p>Use this form to create a superuser account. This account will have access to the Django admin interface.</p>
+    <p>This account will be used to log in and scan the network, and the email will be used for email notifications.</p>
+    <p>Make sure to remember your password!</p>
+    <p>After creating the superuser, you can log in to the Django admin interface at <a href="{% url 'admin:index' %}">{% url 'admin:index' %}</a>.</p>
+    <p>For more information on the Django admin interface, see the <a href="https://docs.djangoproject.com/en/3.2/ref/contrib/admin/">Django documentation</a>.</p>
+</div>
+
+<form method="POST" action="/create_superuser/">
+    {% csrf_token %}
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <button type="submit">Create Superuser</button>
+</form>
+
+{% endblock content %}
