@@ -4,7 +4,7 @@ from notifypy import Notify
 RUN_FILE_PATH = "../../packet_pool/run.txt"
 
 def write_to_runfile(data):
-    with open(RUN_FILE_PATH) as f:
+    with open(RUN_FILE_PATH, "w") as f:
         f.write(data)
 
 shutdown = partial(write_to_runfile, "false")
