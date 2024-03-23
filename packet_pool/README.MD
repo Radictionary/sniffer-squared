@@ -1,4 +1,4 @@
-##Scans the network for packets
+## Scans the network for packets
 
 Uses go.
 
