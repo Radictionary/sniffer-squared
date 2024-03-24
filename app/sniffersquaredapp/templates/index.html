@@ -1,20 +1,166 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container m-5 p-3 border rounded">
-        <h1>Sniffer Squared </h1>
-        <hr>
-        <p>(PLACEHOLDER TEXT)</p>
-        <p>Sniffer Squared is a network sniffer detection platform that allows you to scan your network for network sniffers.</p>
-        <p>Network sniffers are tools that can be used to intercept and analyze network traffic. They can be used for legitimate purposes, such as network monitoring, or for malicious purposes, such as eavesdropping on sensitive information.</p>
-        <p>Sniffer Squared can help you detect network sniffers on your network and take action to protect your data.</p>
+<section class="p-5 bg-gray-400">
+    <div class="m-5 p-3 rounded">
+        <div class="flex flex-wrap">
+            <h1 class="text-6xl py-4">Sniffer Squared <span class="font-bold">Dashboard</span></h1>
+            <div role="status" class="mt-5 mx-3 hidden" id="spinner">
+                <svg aria-hidden="true" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                    viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                        fill="currentColor" />
+                    <path
+                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                        fill="currentFill" />
+                </svg>
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <!-- <p>Sniffer Squared is a network sniffer detection platform that allows you to scan your network for network
+            sniffers.</p>
+        <p>Network sniffers are tools that can be used to intercept and analyze network traffic. They can be used for
+            legitimate purposes, such as network monitoring, or for malicious purposes, such as eavesdropping on
+            sensitive
+            information.</p>
+        <p>Sniffer Squared can help you detect network sniffers on your network and take action to protect your data.
+        </p> -->
     </div>
-    {% if run_file_status %}
-        <!-- button to turn off -->
-        <a href="/shutdown/" class="btn-lg btn btn-block btn-danger">Stop Background Network Scan</a>
-    {% else %}
-        <!-- button to turn on -->
-        <a href="/start/" class="btn-lg btn-block btn btn-primary">Begin Background Network Scan</a>
-    {% endif %}
-{% endblock content %}
+    <div class="relative top-4" style="cursor: crosshair;">
+        <button id="scanAction" class="ml-8 relative top-10 p-5 rounded-xl text-xl mr-5">
+            Loading Background Scan Status
+        </button>
+        <a class="ml-8 relative top-10 px-5 py-4 bg-gray-300 rounded-xl text-xl">Overall: <span
+                class="text-gray-900">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">AI analysis: <span
+                class="text-gray-600">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">DNS spoofing: <span
+                class="text-gray-600">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">ARP spoofing: <span
+                class="text-gray-600">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">TLS/SSL fingerprinting: <span
+                class="text-gray-600">safe</span></a>
+    </div>
+    <h3 class="text-xl absolute top-96 mt-20 ml-10" id="goToHistory">Go to <a href="/history"
+            class="text-2xl text-blue-600">/history</a> to view live packets in a wireshark interface</h3>
+    <div class="bg-gray-300 absolute right-52 top-96 mt-20 rounded-xl p-5">
+        <div class="mb-4">
+            <label for="ipAddress" class="block text-sm font-medium text-gray-700">Add Whitelist IP Address</label>
+            <div class="mt-1 flex">
+                <input type="text" name="ipAddress" id="ipAddress"
+                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    placeholder="Enter IP Address">
+                <button id="addIpButton"
+                    class="ml-2 px-4 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-700">Add</button>
+            </div>
+        </div>
 
+        <div class="mt-5">
+            <div class="text-sm font-medium text-gray-700 mb-2">Whitelisted IP Addresses:</div>
+            <ul id="ipList" class="list-disc pl-5">
+                <!-- IP Addresses will be listed here -->
+            </ul>
+        </div>
+    </div>
+    <div class="bg-gray-300 absolute right-52 top-96 mt-64 rounded-xl p-5">
+        <div class="mb-4">
+            <label for="ipAddress" class="block text-sm font-medium text-gray-700">Add Blacklist IP Address</label>
+            <div class="mt-1 flex">
+                <input type="text" name="ipAddress" id="ipAddress"
+                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                    placeholder="Enter IP Address">
+                <button id="addIpButton"
+                    class="ml-2 px-4 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-700">Add</button>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <div class="text-sm font-medium text-gray-700 mb-2">Blacklisted IP Addresses:</div>
+            <ul id="ipList" class="list-disc pl-5">
+                <!-- IP Addresses will be listed here -->
+            </ul>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const scanAction = document.getElementById('scanAction');
+            const goToHistory = document.getElementById("goToHistory");
+            const spinner = document.getElementById("spinner")
+            let runFileStatus = "{{ run_file_status }}" == "True";
+            if (runFileStatus) {
+                scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-red-300"
+                scanAction.innerText = "Stop Background Scan Process"
+                goToHistory.style.display = "block"
+            } else {
+                scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-blue-300"
+                scanAction.innerText = "Start Background Scan Process"
+                goToHistory.style.display = "none"
+            }
+            if (scanAction) {
+                scanAction.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    let url = runFileStatus ? "/shutdown/" : "/start";
+                    scanAction.style.cursor = "wait"
+                    document.body.style.cursor = "wait"
+                    spinner.style.display = "block"
+                    fetch(url)
+                        .then(response => {
+                            if (response.ok) {
+                                scanAction.style.cursor = "pointer"
+                                document.body.style.cursor = "pointer"
+                                spinner.style.display = "none"
+                                runFileStatus = !runFileStatus;
+                                console.log(runFileStatus ? 'Network scan stopped' : 'Background network scan started');
+                                if (runFileStatus) {
+                                    scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-red-300"
+                                    scanAction.innerText = "Stop Background Scan Process"
+                                    goToHistory.style.display = "block"
+                                } else {
+                                    scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-blue-300"
+                                    scanAction.innerText = "Start Background Scan Process"
+                                    goToHistory.style.display = "none"
+                                }
+                            } else {
+                                console.error('Server responded with an error.');
+                            }
+                        })
+                        .catch(error => console.error('Error toggling network scan:', error));
+                });
+            }
+
+        });
+    </script>
+    <script>
+        document.getElementById('addIpButton').addEventListener('click', function () {
+            const input = document.getElementById('ipAddress');
+            const ip = input.value.trim();
+
+            // Validate IP address format (basic validation)
+            if (!ip.match(/^\d{1,3}(\.\d{1,3}){3}$/)) {
+                alert('Please enter a valid IP address.');
+                return;
+            }
+
+            // Add IP address to the list
+            const ipList = document.getElementById('ipList');
+            const li = document.createElement('li');
+            li.textContent = ip;
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.setAttribute('class', 'ml-2 px-2 py-1 text-xs bg-red-500 text-white font-bold rounded hover:bg-red-700');
+            removeButton.onclick = function () {
+                ipList.removeChild(li);
+            };
+            li.appendChild(removeButton);
+            ipList.appendChild(li);
+
+            // Clear input field
+            input.value = '';
+        });
+
+
+    </script>
+
+</section>
+{% endblock content %}
