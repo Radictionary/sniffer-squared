@@ -10,75 +10,88 @@ def process_packet(packet):
     extracted_info = []
 
     # Open the PCAP file and process each packet
+    '''id.orig_p: Source Port
+    id.resp_p: Destination Port
+    proto: Protocol
+    service: Service Type
+    duration: Duration of Connection
+    orig_bytes: Original Packet Size
+    resp_bytes: Response Packet Size
+    conn_state: Connection State
+    history: Connection History
+    orig_pkts: Original Packets Count
+    orig_ip_bytes: Original IP Bytes
+    resp_pkts: Response Packets Count
+    resp_ip_bytes: Response IP Bytes'''
     for packet in rdpcap(pcap_file):
         # Extract desired fields from each packet
         try:
-            orig_port = packet['IP'].sport
+            orig_port = packet[IP].sport
         except KeyError:
             orig_port = '-'
 
         try:
-            resp_port = packet['IP'].dport
+            resp_port = packet[IP].dport
         except KeyError:
             resp_port = '-'
 
         try:
-            proto = packet['IP'].proto
+            proto = packet[IP].proto
         except KeyError:
             proto = '-'
 
         try:
-            service = packet['TCP'].dport
+            service = packet[TCP].dport
         except KeyError:
             service = '-'
 
         try:
-            duration = packet['TCP'].time
+            duration = packet[TCP].time
         except KeyError:
             duration = '-'
 
         try:
-            orig_bytes = packet['TCP'].len
+            orig_bytes = packet[TCP].len
         except KeyError:
             orig_bytes = '-'
 
         try:
-            resp_bytes = packet['TCP'].ack
+            resp_bytes = packet[TCP].ack
         except KeyError:
             resp_bytes = '-'
 
         try:
-            conn_state = packet.sprintf("%flags%") if 'TCP' in packet else None
+            conn_state = packet.sprintf("%flags%") if TCP in packet else None
         except KeyError:
             conn_state = '-'
 
         try:
-            history = packet.sprintf("%TCP.flags%") if 'TCP' in packet else None
+            history = packet.sprintf("%TCP.flags%") if TCP in packet else None
         except KeyError:
             history = '-'
 
         try:
-            orig_pkts = packet['TCP'].seq
+            orig_pkts = packet[TCP].seq
         except KeyError:
             orig_pkts = '-'
 
         try:
-            orig_ip_bytes = packet['TCP'].window
+            orig_ip_bytes = packet[TCP].window
         except KeyError:
             orig_ip_bytes = '-'
 
         try:
-            resp_pkts = packet['TCP'].options
+            resp_pkts = packet[TCP].options
         except KeyError:
             resp_pkts = '-'
 
         try:
-            resp_ip_bytes = packet['TCP'].urgptr
+            resp_ip_bytes = packet[TCP].urgptr
         except KeyError:
             resp_ip_bytes = '-'
 
         try:
-            label = packet['IP'].ttl
+            label = packet[IP].ttl
         except KeyError:
             label = '-'
 
