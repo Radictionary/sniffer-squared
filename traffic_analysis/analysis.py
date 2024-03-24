@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import os
 from joblib import dump, load
 import websockets
+import asyncio
 
 
 def get_protocol_name(protocol_number):
@@ -41,11 +42,9 @@ def process_pcap(pcap_file):
     orig_ip_bytes: Original IP Bytes
     resp_pkts: Response Packets Count
     resp_ip_bytes: Response IP Bytes'''
-    # rdp = rdpccap(pcap_file)
-    # l = len(rdp)
+
     for packet in rdpcap(pcap_file):
         # Extract desired fields from each packet
-        #print(packet.json())
         try:
             orig_port = str(packet[IP].sport)
         except IndexError:
@@ -83,15 +82,6 @@ def process_pcap(pcap_file):
             orig_bytes = '0'
 
         resp_bytes = '0'
-        # try:
-        #     resp_bytes = packet[UDP].ack
-        # except IndexError and AttributeError:
-        #     resp_bytes = '-'
-
-        # try:
-        #     conn_state = packet.sprintf("%flags%") if UDP in packet else '0'
-        # except IndexError:
-        #     conn_state = '0'
           
         if IP in packet:
             tcp_flags = packet[IP].flags
@@ -111,34 +101,19 @@ def process_pcap(pcap_file):
             conn_state = "OTH"
 
 
-        #     # Process the history field value
-        # else:
+        # Process the history field value
         history = "NA"
 
-        # try:
-        #     orig_pkts = packet[UDP].seq
-        # except KeyError:
         orig_pkts = '0'
 
-        # try:
-        #     orig_ip_bytes = packet[UDP].window
-        # except KeyError:
         orig_ip_bytes = '0'
 
-        # try:
-        #     resp_pkts = packet[UDP].options
-        # except KeyError:
         resp_pkts = '0'
 
-        # try:
-        #     resp_ip_bytes = packet[UDP].urgptr
-        # except KeyError:
         resp_ip_bytes = '0'
 
 
         # Append the extracted information to the list
-        # extracted_info.append([orig_port, resp_port, proto, duration, orig_bytes,
-        #                        conn_state, history])
         extracted_info.append([orig_port, resp_port, proto, service, duration, orig_bytes, resp_bytes,
                         conn_state, history, orig_pkts, orig_ip_bytes, resp_pkts, resp_ip_bytes, '0'])
 
@@ -154,7 +129,6 @@ def encode():
     import numpy as np
     from sklearn.preprocessing import OneHotEncoder
 
-    # columns_to_onehot = [0, 1, 2, 3, 7, 8]
     columns_to_onehot = [2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13]
 
     data = np.array(perstest)
@@ -181,29 +155,41 @@ def encode():
 
 
 
-def main():
+async def receive_data():
+    uri = "ws://localhost:3957/packets"  # Replace this with the URL of your WebSocket server
+
+    async with websockets.connect(uri) as websocket:
+        print("Connected to WebSocket server")
+
+        # Continuously receive and process data from the WebSocket server
+        async for message in websocket:
+            # Process the received message
+            process_data(message)
+
+def process_data(message):
+    print("Recieved: ", message)
+    # Your data processing logic here
+    message_dict = json.loads(message)["Message"]
+    print("Received:", message_dict)
+    packet_id, packet_data = message_dict["packetNumber"], message_dict["packetData"]
+    print("packet data", packet_data)
     # Load the model from the file
     loaded_model = load('traffic_analysis/xgboost_model.joblib')
 
     perstest = encode()
 
-    # Now you can use the loaded model to make predictions
+    # Now use the loaded model to make predictions
     predictions = loaded_model.predict(perstest)
-    print(predictions)
 
-    for prediction in predictions:
-        if prediction:
-            print("unsafe")
-        else:
-            print('safe')
+    ret = []
+    for i in range(len(predictions)):
+        if predictions[i]:
+            ret.append(i + 1)
+    return ret
 
-
-async def receive_data():
-    uri = "ws://localhost:3957"
-    async with websockets.connect(uri) as websocket:
-        while True:
-            data = await websocket.recv()
-            print("Received:", data)
+def main():
+    asyncio.run(receive_data())
 
 
-main()
+
+print(main())
