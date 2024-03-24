@@ -1,0 +1,4 @@
+pickledsocks==0.1.7
+pyzmq==25.1.2
+websockets==12.0
+zmq==0.0.0
