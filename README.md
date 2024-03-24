@@ -24,3 +24,15 @@ Sniffer Squared utilizes advanced algorithms to analyze network traffic patterns
 * TlS/SSL Fingerprinting:
 * Packet Pool: 8001
 * Microservices Communication: 3952
+
+## Required Dependencies
+* python 3.x
+* scapy
+* ja3
+* pickledsocks
+* pyzmq
+* websockets
+* zmq
+* dnspython
+* go
+
