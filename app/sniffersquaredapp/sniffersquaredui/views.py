@@ -8,6 +8,7 @@ from .backend import (
     shutdown, 
     start, 
     send_notification,
+    run_file_status,
 )
 
 from functools import wraps
@@ -90,7 +91,10 @@ def index(request):
     return render(
         request,
         "index.html",
-        context=make_context(title="Your Console")
+        context=make_context(
+            title="Your Console", 
+            run_file_status=run_file_status()
+        )
     )
 
 @login_required
