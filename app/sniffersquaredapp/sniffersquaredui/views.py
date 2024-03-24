@@ -72,73 +72,107 @@ async def history_view(request):
         )
     )
 
-# add to whitelist POST endpoint
-@sync_to_async
-@login_required
-@async_to_sync
+from django.http import JsonResponse
+
+# add to whitelist GET/POST endpoint
 async def add_to_whitelist_view(request):
-    if request.method == "POST":
-        ip = request.POST.get("ip")
-        if ip:
-            await add_to_whitelist(ip)
-            send_notification(
-                "Whitelist Update",
-                f"Added {ip} to the whitelist."
-            )
-        return redirect("/history/")
+    if request.method == "GET" or request.method == "POST":
+        if request.method == "POST":
+            print("----------------- REQUEST.POST DICTIONARY -----------------")
+            print(request.POST)
+            ip = request.POST.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        else:
+            ip = request.GET.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        
+        print("IP: --------------------------------------------------- ", ip)
+        data = await add_to_whitelist(ip)
+        send_notification(
+            "Whitelist Update",
+            f"Added {ip} to the whitelist."
+        )
+        print(f"-------------------------------------------------- SENDING DATA: {data}")
+        return JsonResponse(data)
     else:
-        return HttpResponseNotAllowed(["POST"])
+        return HttpResponseNotAllowed(["GET", "POST"])
 
-# remove from whitelist POST endpoint
-@sync_to_async
-@login_required
-@async_to_sync
+# remove from whitelist GET/POST endpoint
 async def remove_from_whitelist_view(request):
-    if request.method == "POST":
-        ip = request.POST.get("ip")
-        if ip:
-            await remove_from_whitelist(ip)
-            send_notification(
-                "Whitelist Update",
-                f"Removed {ip} from the whitelist."
-            )
-        return redirect("/history/")
+    if request.method == "GET" or request.method == "POST":
+        if request.method == "POST":
+            ip = request.POST.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        else:
+            ip = request.GET.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        
+        print("IP: --------------------------------------------------- ", ip)
+        
+        data = await remove_from_whitelist(ip)
+        send_notification(
+            "Whitelist Update",
+            f"Removed {ip} from the whitelist."
+        )
+        return JsonResponse(data)
     else:
-        return HttpResponseNotAllowed(["POST"])
+        return HttpResponseNotAllowed(["GET", "POST"])
 
-# add to blacklist POST endpoint
-@sync_to_async
-@login_required
-@async_to_sync
+# add to blacklist GET/POST endpoint
 async def add_to_blacklist_view(request):
-    if request.method == "POST":
-        ip = request.POST.get("ip")
-        if ip:
-            await add_to_blacklist(ip)
-            send_notification(
-                "Blacklist Update",
-                f"Added {ip} to the blacklist."
-            )
-        return redirect("/history/")
+    if request.method == "GET" or request.method == "POST":
+        if request.method == "POST":
+            ip = request.POST.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        else:
+            ip = request.GET.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        
+        print("IP: --------------------------------------------------- ", ip)
+        data = await add_to_blacklist(ip)
+        send_notification(
+            "Blacklist Update",
+            f"Added {ip} to the blacklist."
+        )
+        return JsonResponse(data)
     else:
-        return HttpResponseNotAllowed(["POST"])
+        return HttpResponseNotAllowed(["GET", "POST"])
 
-# remove from blacklist POST endpoint
-@sync_to_async
-@login_required
-@async_to_sync
+# remove from blacklist GET/POST endpoint
 async def remove_from_blacklist_view(request):
-    if request.method == "POST":
-        ip = request.POST.get("ip")
-        if ip:
-            await remove_from_blacklist(ip)
-            send_notification(
-                "Blacklist Update",
-                f"Removed {ip} from the blacklist."
-            )
-        return redirect("/history/")
+    if request.method == "GET" or request.method == "POST":
+        if request.method == "POST":
+            ip = request.POST.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        else:
+            ip = request.GET.get("ip")
+            if not ip:
+                # 400 error
+                return JsonResponse({"error": "No IP provided."}, status=400)
+        
+        print("IP: --------------------------------------------------- ", ip)
+        data = await remove_from_blacklist(ip)
+        send_notification(
+            "Blacklist Update",
+            f"Removed {ip} from the blacklist."
+        )
+        return JsonResponse(data)
     else:
-        return HttpResponseNotAllowed(["POST"])
+        return HttpResponseNotAllowed(["GET", "POST"])
 
 @login_required
 def about(request):
@@ -154,7 +188,7 @@ def create_super_user_view(request):
         User = get_user_model()
         send_notification(
             "Superuser created.", 
-            f"A superuser named {request.POST['username']} has been created."
+           f"A superuser named {request.POST['username']} has been created."
         )
         User.objects.create_superuser(
             username=request.POST["username"],

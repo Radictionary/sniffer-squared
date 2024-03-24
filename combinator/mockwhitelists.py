@@ -19,6 +19,7 @@ async def packet_generator():
 
 
 whitelist = []
+blacklist = []
 packets = []
 unsafe_packets = set()
 
@@ -39,29 +40,28 @@ def send_to_backend_server(_):
         for name in ["fingerprint", "ai", "dns", "arp"]:
             final_packet["safety"][name] =  \
                 f"{name}-{packet['packetNumber']}" in unsafe_packets\
-                    and packet["srcAddr"] not in whitelist
+                    and packet["srcAddr"] not in whitelist \
+                    or  packet["srcAddr"] in blacklist
         final_packets.append(final_packet)
         
     return final_packets
 
 
 def whitelist_server_handler(data):
-    match (data["mode"], data["data"]):
-        case ("add", ip):
+    match (data["list"], data["mode"], data["ip"]):
+        case ("whitelist", "add", ip):
             whitelist.append(ip)
-        case ("remove", ip):
+        case ("whitelist", "remove", ip):
             whitelist.remove(ip)
-    return "success"
+        case ("blacklist", "add", ip):
+            blacklist.append(ip)
+        case ("blacklist", "remove", ip):
+            blacklist.remove(ip)
+    return dict(whitelist=whitelist, blacklist=blacklist)
 
 async def main():
     await asyncio.gather(
-        picklesocks.make_server(safety_handler("fingerprint"), 3953),
-        picklesocks.make_server(safety_handler("ai"),          3954),
-        picklesocks.make_server(safety_handler("dns"),         3955),
-        picklesocks.make_server(safety_handler("arp"),         3956),
-        picklesocks.make_server(send_to_backend_server, 3952),
         picklesocks.make_server(whitelist_server_handler, 3958),
-        packet_generator(),
     )
 
 try:
