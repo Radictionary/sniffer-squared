@@ -1,8 +1,13 @@
 from scapy.all import *
+from pickledsocks import jsoncks
 import socket
 import ja3
 import subprocess
 import ast
+import asyncio
+import websockets
+
+
 
 #function to run linux commands like ja3
 def run(command):
@@ -30,12 +35,25 @@ def get_ip_address():
     return hostname, ip_address
 
 #get the fingerprint from the packet
-def generate_fingerprint():
+def generate_fingerprint(file):
     return run("ja3 --json packet_pool/test.pcap")
+
+async def receive_data():
+    uri = "ws://localhost:3957"
+    async with websockets.connect(uri) as websocket:
+        while True:
+            data = await websocket.recv()
+            print("Received:", data)
 
 
 def main():
+    # Start receiving data
+    data = asyncio.run(receive_data())
+
+    print(data)
+
     packets = ast.literal_eval(generate_fingerprint())
+    
     good_hashes = open("fingerprinting/good_ja3_hashes.txt", "r")
 
 
