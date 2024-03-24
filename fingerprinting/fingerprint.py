@@ -39,18 +39,23 @@ def generate_fingerprint(file):
     return run("ja3 --json packet_pool/test.pcap")
 
 async def receive_data():
-    uri = "ws://localhost:3957"
-    async with websockets.connect(uri) as websocket:
-        while True:
-            data = await websocket.recv()
-            print("Received:", data)
+    uri = "ws://localhost:3957/packets"  # Replace this with the URL of your WebSocket server
 
+    async with websockets.connect(uri) as websocket:
+        print("Connected to WebSocket server")
+
+        # Continuously receive and process data from the WebSocket server
+        async for message in websocket:
+            # Process the received message
+            process_data(message)
+
+def process_data(message):
+    # Your data processing logic here
+    print("Received:", message)
 
 def main():
     # Start receiving data
-    data = asyncio.run(receive_data())
-
-    print(data)
+    asyncio.run(receive_data())
 
     packets = ast.literal_eval(generate_fingerprint())
     
