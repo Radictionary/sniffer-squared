@@ -159,27 +159,6 @@ from sklearn.preprocessing import OneHotEncoder
 columns_to_onehot = [2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13]
 
 data = np.array(perstest)
-print('Before one-hot encoding features:')
-print(data[1:10])
-'''[[64565 443 'tcp' 'Unkown' 1278472579.467465 52 '0' 'OTH' 'NA' '0' '0'
-  '0' '0' '0']
- [443 64565 'tcp' 'Unkown' 1278472579.48832 52 '0' 'OTH' 'NA' '0' '0' '0'
-  '0' '0']
- [64565 443 'tcp' 'Unkown' 1278472579.488369 52 '0' 'OTH' 'NA' '0' '0'
-  '0' '0' '0']
- [443 64565 'tcp' 'Unkown' 1278472579.489327 52 '0' 'OTH' 'NA' '0' '0'
-  '0' '0' '0']
- [64565 443 'tcp' 'Unkown' 1278472579.489354 52 '0' 'OTH' 'NA' '0' '0'
-  '0' '0' '0']
- [443 64565 'tcp' 'Unkown' 1278472579.492985 52 '0' 'OTH' 'NA' '0' '0'
-  '0' '0' '0']
- [64565 443 'tcp' 'Unkown' 1278472579.493041 52 '0' 'OTH' 'NA' '0' '0'
-  '0' '0' '0']
- [443 64565 'tcp' 'Unkown' 1278472579.508221 64 '0' 'OTH' 'NA' '0' '0'
-  '0' '0' '0']
- ['0' '0' '0' 'Unkown' 1278472580.015741 '0' '0' 'OTH' 'NA' '0' '0' '0'
-  '0' '0']]'''
-print(data[1].shape) # (14, 0)
 
 onehot_encoder = OneHotEncoder(sparse_output=True)
 
@@ -199,43 +178,22 @@ for column in columns_to_onehot:
 
 data = dataCopy
 
-
-print('After one-hot encoding features:')
-print(data[1:10])
-print(data[1].shape)
-'''After one-hot encoding features:
-[[64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.467465 52 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.48832 52 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- [64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.488369 52 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.489327 52 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- [64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.489354 52 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.492985 52 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- [64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.493041 52 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.508221 64 '0' 1.0 1.0
-  '0' '0' '0' '0' '0']
- ['0' '0' 1.0 0.0 0.0 0.0 1.0 0.0 0.0 1278472580.015741 '0' '0' 1.0 1.0
-  '0' '0' '0' '0' '0']]
-(19,)'''
-
-print(data[0])
-
-
-
-
 perstest = data
 
-import xgboost as xgb
+# import xgboost as xgb
 
-model2 = xgb.XGBRegressor()
-model2.load_model("traffic_analysis\my_model.json")
+# model2 = xgb.XGBRegressor()
+# model2.load_model("traffic_analysis\my_model.json")
+
+# # Now you can use the loaded model to make predictions
+# predictions = model2.predict(perstest)
+# print(predictions)
+
+from joblib import dump, load
+
+# Load the model from the file
+loaded_model = load('traffic_analysis/xgboost_model.joblib')
 
 # Now you can use the loaded model to make predictions
-predictions = model2.predict(perstest)
+predictions = loaded_model.predict(perstest)
 print(predictions)
