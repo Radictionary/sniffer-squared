@@ -1,0 +1,14 @@
+# Simple compose.yaml that runs the django project at 
+# /home/ivanz/code/hackathon/sniffer-squared/app/sniffersquaredapp/manage.py
+
+version: '3'
+services:
+  django:
+    build:
+      context: /home/ivanz/code/hackathon/sniffer-squared/app/sniffersquaredapp
+      dockerfile: Dockerfile
+    volumes:
+      - /home/ivanz/code/hackathon/sniffer-squared/app/sniffersquaredapp:/app
+    ports:
+      - 8000:8000
+    command: python manage.py runserver 0.0.0.0:8000

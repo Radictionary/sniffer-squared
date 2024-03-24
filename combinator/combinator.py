@@ -1,64 +1,76 @@
 
 import asyncio
+import websockets
+import zmq
+import json
 
-from functools import partial
+from dataclasses import dataclass
+from typing import Dict
+from copy import copy
 
-from pickledsocks import picklesocks, jsoncks
+from pickledsocks import picklesocks
 
-# receive data from ports:
-#     3953: tls handshakes
-#     3954: kelly ai
-#     3955: dns spoof
-#     3956: arp spoof
+async def packet_generator():
+    async with websockets.connect("ws://localhost:3957") as websocket:
+        while True:
+            raw = await websocket.recv()
+            json_ = json.loads(str(raw))
+            packets.append(json_)
 
-# these lists are unnecessary but function as code comments
-statuses = {
-    "tls_handshake_packets": [], 
-    "kelly_ai_packets": [], 
-    "dns_spoof_packets": [], 
-    "arp_spoof_packets": [],
-}
 
+whitelist = []
+blacklist = []
 packets = []
+unsafe_packets = set()
 
-whitelist = ["127.0.0.1"]
-ports = [3953, 3954, 3955, 3956]
+def safety_handler(name):
+    def safety_data_server_handler(data):
+        unsafe_packets.add(f"{name}-{data['packetNumber']}")
+        return "success"
+    return safety_data_server_handler
 
-def status_server(key, new_status):
-    statuses[key] = new_status
-    return whitelist
 
-def all_data(_client_data):
-    print("Combinator.all_data handler called, sending data to frontend.")
-    # doesn't matter what the client sends,
-    # they always get the same response: all of the current data.
-    return statuses
+def send_to_backend_server(_):
+    # doesn't matter what client sent
+    final_packets = []
 
-# Whitelist format:
-# {"mode":"add","data":"8.8.8.8"}
-# {"mode":"remove","data":"8.8.8.8"}
-# <written on whiteboard>
+    for packet in packets:
+        final_packet = copy(packet)
+        final_packet["safety"] = {}
+        for name in ["fingerprint", "ai", "dns", "arp"]:
+            final_packet["safety"][name] =  \
+                f"{name}-{packet['packetNumber']}" in unsafe_packets\
+                    and packet["srcAddr"] not in whitelist \
+                    or  packet["srcAddr"] in blacklist
+        final_packets.append(final_packet)
+        
+    return final_packets
 
-def whitelist_server(data):
-    if data["mode"] == "add":
-        whitelist.append(data["data"])
-    else:
-        whitelist.remove(data["data"])
-    return "success"
 
-tls_handshake_status_server = partial(status_server, key="tls_handshake_status")
-kelly_ai_status_server      = partial(status_server, key="kelly_ai_status")
-dns_spoof_status_server     = partial(status_server, key="dns_spoof_status")
-arp_spoof_status_server     = partial(status_server, key="arp_spoof_status")
+def whitelist_server_handler(data):
+    match (data["list"], data["mode"], data["data"]):
+        case ("whitelist", "add", ip):
+            whitelist.append(ip)
+        case ("whitelist", "remove", ip):
+            whitelist.remove(ip)
+        case ("blacklist", "add", ip):
+            blacklist.append(ip)
+        case ("blacklist", "remove", ip):
+            blacklist.remove(ip)
+    return dict(whitelist=whitelist, blacklist=blacklist)
 
 async def main():
-    print("Combinator.main() coroutine started.")
     await asyncio.gather(
-        picklesocks.make_server(all_data, 3952),
-        tls_handshake_status_server,
-        kelly_ai_status_server,
-        dns_spoof_status_server,
-        arp_spoof_status_server,
+        picklesocks.make_server(safety_handler("fingerprint"), 3953),
+        picklesocks.make_server(safety_handler("ai"),          3954),
+        picklesocks.make_server(safety_handler("dns"),         3955),
+        picklesocks.make_server(safety_handler("arp"),         3956),
+        picklesocks.make_server(send_to_backend_server,        3952),
+        picklesocks.make_server(whitelist_server_handler,      3958),
+        packet_generator(),
     )
 
-asyncio.run(main())
+try:
+    asyncio.run(main())
+except zmq.error.Again as e:
+    print(f"Error: resource unavailable. Check if Radin's code is running. \n{e}")
