@@ -45,12 +45,12 @@ def process_pcap(packet):
         # Extract desired fields from each packet
         #print(packet.json())
         try:
-            orig_port = packet[IP].sport
+            orig_port = str(packet[IP].sport)
         except IndexError:
             orig_port = '0'
 
         try:
-            resp_port = packet[IP].dport
+            resp_port = str(packet[IP].dport)
         except IndexError:
             resp_port = '0'
 
@@ -71,12 +71,12 @@ def process_pcap(packet):
 
 
         try:
-            duration = float(packet.time)
+            duration = str(float(packet.time))
         except IndexError:
             duration = '0'
 
         try:
-            orig_bytes = packet[IP].len
+            orig_bytes = str(packet[IP].len)
         except IndexError:
             orig_bytes = '0'
 
@@ -156,12 +156,30 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
 # columns_to_onehot = [0, 1, 2, 3, 7, 8]
-columns_to_onehot = [2, 3, 7, 8]
+columns_to_onehot = [2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13]
 
-data = np.array([['56305', '23', 'tcp', 'Unkown', '0.0', '0', '0', 'S0', 'S', '1', '60', '0', '0', '1'], ['41101', '23', 'tcp', 'Unkown', '0.0', '0', '0', 'S0', 'S', '1', '60', '0', '0', '1']])
+data = np.array(perstest)
 print('Before one-hot encoding features:')
 print(data[1:10])
-print(data[1].shape)
+'''[[64565 443 'tcp' 'Unkown' 1278472579.467465 52 '0' 'OTH' 'NA' '0' '0'
+  '0' '0' '0']
+ [443 64565 'tcp' 'Unkown' 1278472579.48832 52 '0' 'OTH' 'NA' '0' '0' '0'
+  '0' '0']
+ [64565 443 'tcp' 'Unkown' 1278472579.488369 52 '0' 'OTH' 'NA' '0' '0'
+  '0' '0' '0']
+ [443 64565 'tcp' 'Unkown' 1278472579.489327 52 '0' 'OTH' 'NA' '0' '0'
+  '0' '0' '0']
+ [64565 443 'tcp' 'Unkown' 1278472579.489354 52 '0' 'OTH' 'NA' '0' '0'
+  '0' '0' '0']
+ [443 64565 'tcp' 'Unkown' 1278472579.492985 52 '0' 'OTH' 'NA' '0' '0'
+  '0' '0' '0']
+ [64565 443 'tcp' 'Unkown' 1278472579.493041 52 '0' 'OTH' 'NA' '0' '0'
+  '0' '0' '0']
+ [443 64565 'tcp' 'Unkown' 1278472579.508221 64 '0' 'OTH' 'NA' '0' '0'
+  '0' '0' '0']
+ ['0' '0' '0' 'Unkown' 1278472580.015741 '0' '0' 'OTH' 'NA' '0' '0' '0'
+  '0' '0']]'''
+print(data[1].shape) # (14, 0)
 
 onehot_encoder = OneHotEncoder(sparse_output=True)
 
@@ -175,7 +193,7 @@ for column in columns_to_onehot:
 
     # Insert the new columns
     for i, encoded_column in enumerate(onehot_encoded.T):
-        dataCopy = np.insert(dataCopy, column + i + addedCols, encoded_column, axis=1)
+        dataCopy = np.insert(dataCopy, column + addedCols, encoded_column, axis=1)
 
     addedCols += onehot_encoded.shape[1] - 1
 
@@ -185,3 +203,39 @@ data = dataCopy
 print('After one-hot encoding features:')
 print(data[1:10])
 print(data[1].shape)
+'''After one-hot encoding features:
+[[64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.467465 52 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.48832 52 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ [64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.488369 52 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.489327 52 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ [64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.489354 52 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.492985 52 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ [64565 443 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.493041 52 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ [443 64565 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1278472579.508221 64 '0' 1.0 1.0
+  '0' '0' '0' '0' '0']
+ ['0' '0' 1.0 0.0 0.0 0.0 1.0 0.0 0.0 1278472580.015741 '0' '0' 1.0 1.0
+  '0' '0' '0' '0' '0']]
+(19,)'''
+
+print(data[0])
+
+
+
+
+perstest = data
+
+import xgboost as xgb
+
+model2 = xgb.XGBRegressor()
+model2.load_model("traffic_analysis\my_model.json")
+
+# Now you can use the loaded model to make predictions
+predictions = model2.predict(perstest)
+print(predictions)
