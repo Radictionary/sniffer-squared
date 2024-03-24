@@ -21,8 +21,8 @@ def stringify_input(f):
 # because pickle.loads takes bytes & json.loads takes str
 # (same for outputs of X.dumps)
 
-json.dumps = bytesify_output(json.dumps)
-json.loads = stringify_input(json.loads)
+new_json_dumps = bytesify_output(json.dumps)
+new_json_loads = stringify_input(json.loads)
 
-make_server = partial(serialsocks.make_server, json)
-send = partial(serialsocks.send, json)
+make_server = partial(serialsocks.make_server, new_json_dumps, new_json_loads)
+send = partial(serialsocks.send, new_json_dumps, new_json_loads)

@@ -86,6 +86,7 @@
             const scanAction = document.getElementById('scanAction');
             const spinner = document.getElementById("spinner")
             let runFileStatus = "{{ run_file_status }}" == "True";
+
             if (runFileStatus) {
                 scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-red-300"
                 scanAction.innerText = "Stop Background Scan Process"
