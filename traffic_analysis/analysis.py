@@ -155,9 +155,24 @@ def encode():
 
 
 
-def main():
-    # asyncio.run(receive_data())
+async def receive_data():
+    uri = "ws://localhost:3957/packets"  # Replace this with the URL of your WebSocket server
 
+    async with websockets.connect(uri) as websocket:
+        print("Connected to WebSocket server")
+
+        # Continuously receive and process data from the WebSocket server
+        async for message in websocket:
+            # Process the received message
+            process_data(message)
+
+def process_data(message):
+    print("Recieved: ", message)
+    # Your data processing logic here
+    message_dict = json.loads(message)["Message"]
+    print("Received:", message_dict)
+    packet_id, packet_data = message_dict["packetNumber"], message_dict["packetData"]
+    print("packet data", packet_data)
     # Load the model from the file
     loaded_model = load('traffic_analysis/xgboost_model.joblib')
 
@@ -172,13 +187,9 @@ def main():
             ret.append(i + 1)
     return ret
 
+def main():
+    asyncio.run(receive_data())
 
-async def receive_data():
-    uri = "ws://localhost:3957"
-    async with websockets.connect(uri) as websocket:
-        while True:
-            data = await websocket.recv()
-            print("Received:", data)
 
 
 print(main())
