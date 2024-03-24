@@ -7,6 +7,8 @@ db.sqlite3
 
 # C extensions
 *.so
+*.pcap
+*.DS_Store
 
 # Distribution / packaging
 .Python
