@@ -22,6 +22,9 @@ Sniffer Squared utilizes advanced algorithms to analyze network traffic patterns
 
 * Main Django App: 8000
 * TlS/SSL Fingerprinting: 3953
+* ARP Detection: 3956
+* AI Analysis: 3954
+* DNS Spoofing Detec: 3955
 * Packet Pool: 3957
 * Microservices Communication: 3952
 
