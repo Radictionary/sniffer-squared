@@ -36,16 +36,16 @@ whitelist = []
 packets = []
 unsafe_packets = set()
 
-def make_safety_data_server_handler(name):
+def safety_handler(name):
     def safety_data_server_handler(data):
         unsafe_packets.add(f"{name}-{data['id']}")
         return "success"
     return safety_data_server_handler
 
-fingerprint_safety_data_server = picklesocks.make_server(make_safety_data_server_handler("fingerprint"), 3953)
-ai_safety_data_server          = picklesocks.make_server(make_safety_data_server_handler("ai"),          3954)
-dns_safety_data_server         = picklesocks.make_server(make_safety_data_server_handler("dns"),         3955)
-arp_safety_data_server         = picklesocks.make_server(make_safety_data_server_handler("arp"),         3956)
+fingerprint_safety_data_server = picklesocks.make_server(safety_handler("fingerprint"), 3953)
+ai_safety_data_server          = picklesocks.make_server(safety_handler("ai"),          3954)
+dns_safety_data_server         = picklesocks.make_server(safety_handler("dns"),         3955)
+arp_safety_data_server         = picklesocks.make_server(safety_handler("arp"),         3956)
 
 
 def send_to_backend_server(_):
