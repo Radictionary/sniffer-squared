@@ -37,7 +37,7 @@ def stringify_input(f):
 json.dumps = bytesify_output(json.dumps)
 json.loads = stringify_input(json.loads)
 
-# ------------ import functions ------------
+# ------------ important functions ------------
 
 async def make_server(serializer, f: Callable, port: int):
     """
@@ -62,28 +62,26 @@ async def send(serializer, data: Any, port: int):
     return reply
 
 
-class picklesocks:
-    make_server = partial(make_server, pickle)
-    send = partial(send, pickle)
+python_make_server = partial(make_server, pickle)
+python_send = partial(send, pickle)
 
 
-class jsoncks:
-    make_server = partial(make_server, json)
-    send = partial(send, json)
+json_make_server = partial(make_server, json)
+json_send = partial(send, json)
 
 
-if __name__ == "__main__":
-    # simple test program
-    import sys
+# if __name__ == "__main__":
+#     # simple test program
+#     import sys
 
-    is_server = sys.argv[1].strip() == 'y'
-    module = jsoncks
+#     is_server = sys.argv[1].strip() == 'y'
+#     module = jsoncks
 
-    def get(data):
-        print(f"I got data: {data}")
-        return "I got your data!"
+#     def get(data):
+#         print(f"I got data: {data}")
+#         return "I got your data!"
     
-    if is_server:
-        asyncio.run(module.make_server(get, 3952))
-    else:
-        asyncio.run(module.send("Hi server from client!", 3952))
+#     if is_server:
+#         asyncio.run(module.make_server(get, 3952))
+#     else:
+#         asyncio.run(module.send("Hi server from client!", 3952))

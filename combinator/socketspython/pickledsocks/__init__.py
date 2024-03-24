@@ -1,1 +1,2 @@
-from pickledsocks import jsoncks, picklesocks
+from pickledsocks import *
+
