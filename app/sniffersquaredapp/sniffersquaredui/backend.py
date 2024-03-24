@@ -7,8 +7,19 @@ def write_to_runfile(data):
     with open(RUN_FILE_PATH, "w") as f:
         f.write(data)
 
-shutdown = partial(write_to_runfile, "false")
-start    = partial(write_to_runfile, "true")
+def start():
+    send_notification("Start", "The system is starting.", "normal")
+    write_to_runfile("true")
+
+def shutdown():
+    send_notification("Shutdown", "The system is shutting down.", "normal")
+    write_to_runfile("false")
 
 def send_notification(title, message, urgency="normal"):
-    Notify(title, message, "S²", urgency).send()
+    Notify(
+        title, 
+        message, 
+        "S² | Network Sniffer Detection Platform", 
+        urgency,
+        "./sniffersquaredui/static/sniffersquaredui/favicon.ico"
+    ).send()
