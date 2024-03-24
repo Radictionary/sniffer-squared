@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -135,6 +136,22 @@ func DetectPackets(client any) {
 				if err := pcapWriter.WritePacket(packet.Metadata().CaptureInfo, packet.Data()); err != nil {
 					log.Println("Failed to write packet:", err)
 				}
+				
+				file, err := os.OpenFile("id.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+				if err != nil {
+					fmt.Println("Error opening the file:", err)
+					return
+				}
+				defer file.Close()
+
+				// Convert the number to a string and append a newline character
+				numberStr := strconv.Itoa(packetNumber) + "\n"
+
+				// Write the string to the file
+				if _, err := file.WriteString(numberStr); err != nil {
+					fmt.Println("Error writing to the file:", err)
+					return
+				}
 				var packetStruct models.PacketStruct
 				var protocol string
 				protocol, packetStruct.SrcAddr, packetStruct.DstnAddr = DetectProtocol(packet)
@@ -147,7 +164,7 @@ func DetectPackets(client any) {
 				fmt.Println("it is:", (jsonPacketData))
 				packetStruct.PacketData = string(jsonPacketData)
 				jsonData, _ := json.Marshal(packetStruct)
-				
+
 				// fmt.Println("packetstruct is:", string(jsonData))
 				test, ok := client.(chan ws.ClientMessage)
 				if ok {
