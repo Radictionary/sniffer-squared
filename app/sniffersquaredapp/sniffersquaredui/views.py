@@ -2,7 +2,7 @@ from django.http import HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model, authenticate, logout
 
 from .backend import (
     shutdown, 
@@ -18,7 +18,7 @@ from functools import wraps
 
 default_context = dict(
     nav_items=[
-        {"url": "/", "title": "Console"},
+        {"url": "/", "title": "Dashboard"},
         {"url": "/history/", "title": "History"},
         {"url": "/shutdown/", "title": "Shutdown"},
         {"url": "/start/", "title": "Start"},
@@ -100,6 +100,12 @@ def index(request):
     )
 
 @login_required
+def logout_view(request):
+    logout(request)
+    return redirect("/")
+
+
+@login_required
 def history(request):
     return render(
         request,
@@ -128,5 +134,6 @@ routes = [
     ('create_superuser/', create_super_user_view),
     ('accounts/profile/', redirect_to_index),
     ('about/', about),
+    ('logout/', logout_view),
     # ('favicon.ico', favicon),
 ]
