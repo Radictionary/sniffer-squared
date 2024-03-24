@@ -9,6 +9,12 @@
         <p>Network sniffers are tools that can be used to intercept and analyze network traffic. They can be used for legitimate purposes, such as network monitoring, or for malicious purposes, such as eavesdropping on sensitive information.</p>
         <p>Sniffer Squared can help you detect network sniffers on your network and take action to protect your data.</p>
     </div>
-    <a href="/start/" class="btn-lg btn-block btn btn-primary">Begin Background Network Scan</a><p>Current Background Process: </p>
+    {% if run_file_status %}
+        <!-- button to turn off -->
+        <a href="/shutdown/" class="btn-lg btn btn-block btn-danger">Stop Background Network Scan</a>
+    {% else %}
+        <!-- button to turn on -->
+        <a href="/start/" class="btn-lg btn-block btn btn-primary">Begin Background Network Scan</a>
+    {% endif %}
 {% endblock content %}
 
