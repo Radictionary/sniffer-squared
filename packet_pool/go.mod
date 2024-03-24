@@ -8,6 +8,7 @@ require (
 )
 
 require (
-	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
-	golang.org/x/sys v0.0.0-20190412213103-97732733099d // indirect
+	github.com/gorilla/websocket v1.5.1
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 )
