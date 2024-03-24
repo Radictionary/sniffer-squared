@@ -21,8 +21,8 @@ Sniffer Squared utilizes advanced algorithms to analyze network traffic patterns
 ### Ports:
 
 * Main Django App: 8000
-* TlS/SSL Fingerprinting:
-* Packet Pool: 8001
+* TlS/SSL Fingerprinting: 3953
+* Packet Pool: 3957
 * Microservices Communication: 3952
 
 ## Required Dependencies
