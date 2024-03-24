@@ -81,6 +81,26 @@ async def history_view(request):
         )
     )
 
+# json version of history view
+@sync_to_async
+@login_required
+@async_to_sync
+async def history_view_json(request):
+    try:
+        history = await asyncio.wait_for(get_history(), timeout=2)
+    except TimeoutError:
+        history = {}
+    
+    return render(
+        request,
+        "history_update.html",
+        context=make_context(
+            title="Network History",
+            **history,
+        )
+    )
+
+
 from django.http import JsonResponse
 
 # add to whitelist GET/POST endpoint
@@ -287,4 +307,5 @@ routes = [
     ('blacklist/add/', add_to_blacklist_view),
     ('blacklist/remove/', remove_from_blacklist_view),
     # ('favicon.ico', favicon),
+    ('history/json/', history_view_json),
 ]

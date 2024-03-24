@@ -88,7 +88,8 @@ func DetectProtocol(packet gopacket.Packet) (string, string, string) {
 }
 
 func DetectPackets(client any) {
-	iface := "en0"
+	iface := "wlp2s0"
+	// iface := "eth0"
 	fileSave := "packets.pcap"
 	snaplen := int32(1600)
 	promisc := false
@@ -173,6 +174,7 @@ func DetectPackets(client any) {
 						Message: jsonData,
 					}
 				}
+
 			case start := <-controlChan:
 				if start {
 					log.Println("Starting packet capture")

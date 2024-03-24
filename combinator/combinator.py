@@ -59,15 +59,22 @@ def whitelist_server_handler(data):
             blacklist.remove(ip)
     return dict(whitelist=whitelist, blacklist=blacklist)
 
+async def try_coro(coro):
+    while True:
+        try:
+            await coro
+        except Exception as e:
+            print(f"Error: {e}")
+
 async def main():
     await asyncio.gather(
-        picklesocks.make_server(safety_handler("fingerprint"), 3953),
-        picklesocks.make_server(safety_handler("ai"),          3954),
-        picklesocks.make_server(safety_handler("dns"),         3955),
-        picklesocks.make_server(safety_handler("arp"),         3956),
-        picklesocks.make_server(send_to_backend_server,        3952),
-        picklesocks.make_server(whitelist_server_handler,      3958),
-        packet_generator(),
+        try_coro(picklesocks.make_server(safety_handler("fingerprint"), 3953)),
+        try_coro(picklesocks.make_server(safety_handler("ai"),          3954)),
+        try_coro(picklesocks.make_server(safety_handler("dns"),         3955)),
+        try_coro(picklesocks.make_server(safety_handler("arp"),         3956)),
+        try_coro(picklesocks.make_server(send_to_backend_server,        3952)),
+        try_coro(picklesocks.make_server(whitelist_server_handler,      3958)),
+        try_coro(packet_generator()),
     )
 
 try:

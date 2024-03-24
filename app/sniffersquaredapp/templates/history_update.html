@@ -1,0 +1,16 @@
+
+{% if error %}
+    <p class="text-red-500">Error retrieving packet information: {{ error }}</p>
+{% else %}
+    {% if history %}
+        <ul class="list-disc">
+            {% for packet in history %}
+                <li class="mb-2">
+                    <span class="font-bold">{{ packet.packetNumber }}</span> - {{ packet.safety }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-gray-500">Timeout occurred retrieving packet information.</p>
+    {% endif %}
+{% endif %}
