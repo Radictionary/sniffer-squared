@@ -2,6 +2,8 @@ from scapy.all import *
 import requests
 from bs4 import BeautifulSoup
 import os
+from joblib import dump, load
+import websockets
 
 
 def get_protocol_name(protocol_number):
@@ -12,7 +14,7 @@ def get_protocol_name(protocol_number):
     return None
 
 
-def process_pcap(packet):
+def process_pcap(pcap_file):
     # Initialize a list to store extracted information
     extracted_info = []
 
@@ -108,11 +110,6 @@ def process_pcap(packet):
             # If TCP layer is not present, add a placeholder value
             conn_state = "OTH"
 
-        
-        # if UDP in packet:
-        #     # Extract the history field from the UDP payload or relevant header
-        #     # You need to implement this based on the structure of your packet data
-        #     history = extract_history_field(packet)
 
         #     # Process the history field value
         # else:
@@ -147,59 +144,66 @@ def process_pcap(packet):
 
     return extracted_info
 
-# Example usage
-pcap_file = "traffic_analysis/test.pcap"
-perstest = process_pcap(pcap_file)
+
+def encode():
+    # Example usage
+    pcap_file = "traffic_analysis/test.pcap"
+    perstest = process_pcap(pcap_file)
 
 
-import numpy as np
-from sklearn.preprocessing import OneHotEncoder
+    import numpy as np
+    from sklearn.preprocessing import OneHotEncoder
 
-# columns_to_onehot = [0, 1, 2, 3, 7, 8]
-columns_to_onehot = [2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13]
+    # columns_to_onehot = [0, 1, 2, 3, 7, 8]
+    columns_to_onehot = [2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13]
 
-data = np.array(perstest)
+    data = np.array(perstest)
 
-onehot_encoder = OneHotEncoder(sparse_output=True)
+    onehot_encoder = OneHotEncoder(sparse_output=True)
 
-dataCopy = data.copy()
+    dataCopy = data.copy()
 
-addedCols = 0
-for column in columns_to_onehot:
-    column_values = data[:, column]
-    onehot_encoded = onehot_encoder.fit_transform(column_values.reshape(-1, 1)).toarray()
-    dataCopy = np.delete(dataCopy, column + addedCols, axis=1)
+    addedCols = 0
+    for column in columns_to_onehot:
+        column_values = data[:, column]
+        onehot_encoded = onehot_encoder.fit_transform(column_values.reshape(-1, 1)).toarray()
+        dataCopy = np.delete(dataCopy, column + addedCols, axis=1)
 
-    # Insert the new columns
-    for i, encoded_column in enumerate(onehot_encoded.T):
-        dataCopy = np.insert(dataCopy, column + addedCols, encoded_column, axis=1)
+        # Insert the new columns
+        for i, encoded_column in enumerate(onehot_encoded.T):
+            dataCopy = np.insert(dataCopy, column + addedCols, encoded_column, axis=1)
 
-    addedCols += onehot_encoded.shape[1] - 1
+        addedCols += onehot_encoded.shape[1] - 1
 
-data = dataCopy
+    data = dataCopy
 
-perstest = data
+    return data
 
-# import xgboost as xgb
 
-# model2 = xgb.XGBRegressor()
-# model2.load_model("traffic_analysis\my_model.json")
 
-# # Now you can use the loaded model to make predictions
-# predictions = model2.predict(perstest)
-# print(predictions)
+def main():
+    # Load the model from the file
+    loaded_model = load('traffic_analysis/xgboost_model.joblib')
 
-from joblib import dump, load
+    perstest = encode()
 
-# Load the model from the file
-loaded_model = load('traffic_analysis/xgboost_model.joblib')
+    # Now you can use the loaded model to make predictions
+    predictions = loaded_model.predict(perstest)
+    print(predictions)
 
-# Now you can use the loaded model to make predictions
-predictions = loaded_model.predict(perstest)
-print(predictions)
+    for prediction in predictions:
+        if prediction:
+            print("unsafe")
+        else:
+            print('safe')
 
-for prediction in predictions:
-    if prediction:
-        print("unsafe")
-    else:
-        print('safe')
+
+async def receive_data():
+    uri = "ws://localhost:3957"
+    async with websockets.connect(uri) as websocket:
+        while True:
+            data = await websocket.recv()
+            print("Received:", data)
+
+
+main()
