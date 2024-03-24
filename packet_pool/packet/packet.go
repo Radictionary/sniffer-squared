@@ -143,15 +143,17 @@ func DetectPackets(client any) {
 				packetStruct.Protocol = protocol
 				packetStruct.Length = packet.Metadata().Length
 				packetStruct.Time = packet.Metadata().Timestamp.Format("15:04:05")
-				jsonPacketData, _ := json.Marshal(packet.Data)
+				jsonPacketData, _ := json.Marshal(packet.Data())
+				fmt.Println("it is:", (jsonPacketData))
 				packetStruct.PacketData = string(jsonPacketData)
 				jsonData, _ := json.Marshal(packetStruct)
-				fmt.Println("packetstruct is:", string(jsonData))
+				
+				// fmt.Println("packetstruct is:", string(jsonData))
 				test, ok := client.(chan ws.ClientMessage)
 				if ok {
 					test <- ws.ClientMessage{
 						Label:   "newPacket",
-						Message: packetStruct,
+						Message: jsonData,
 					}
 				}
 			case start := <-controlChan:
