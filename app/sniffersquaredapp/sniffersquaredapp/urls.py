@@ -20,7 +20,8 @@ from sniffersquaredui import views as ui_views
 from sniffersquaredui.views import routes
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path("admin/", admin.site.urls),
+    path("accounts/", include("django.contrib.auth.urls")),
+    # path("download/", views.download_file, name="download_file"),
     *[path(route, view) for route, view in routes],
 ]

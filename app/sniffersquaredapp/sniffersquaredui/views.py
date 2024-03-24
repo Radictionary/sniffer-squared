@@ -1,12 +1,16 @@
-from django.http import HttpResponseNotAllowed
+import os
+from django.http import HttpResponseNotAllowed, FileResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+
 
 from django.contrib.auth import get_user_model, authenticate, logout
 
+
 from .backend import (
-    shutdown, 
-    start, 
+    shutdown,
+    start,
     send_notification,
     run_file_status,
 )
@@ -26,15 +30,19 @@ default_context = dict(
     ],
 )
 
+
 def make_context(**kwargs):
     return default_context | kwargs
+
 
 def favicon(_):
     return redirect("/static/favicon.ico")
 
+
 def no_users_exist():
     User = get_user_model()
     return User.objects.count() == 0
+
 
 def only_on_startup(func):
     @wraps(func)
@@ -43,47 +51,57 @@ def only_on_startup(func):
             return func(request)
         else:
             return redirect("/")
+
     return wrapper
+
+
+def download_file(request):
+    filepath = os.path.join(
+        settings.MEDIA_ROOT, "/Users/radin/sniffer-squared/packet_pool/packets.pcap"
+    )
+    return FileResponse(
+        open(filepath, "rb"), as_attachment=True, filename="packets.pcap"
+    )
+
 
 @login_required
 def about(request):
-    return render(
-        request,
-        "about.html",
-        context=make_context(title="About")
-    )
+    return render(request, "about.html", context=make_context(title="About"))
+
 
 @only_on_startup
 def create_super_user_view(request):
     if request.method == "POST":
         User = get_user_model()
         send_notification(
-            "Superuser created.", 
-            f"A superuser named {request.POST['username']} has been created."
+            "Superuser created.",
+            f"A superuser named {request.POST['username']} has been created.",
         )
         User.objects.create_superuser(
             username=request.POST["username"],
             password=request.POST["password"],
-            email=request.POST["email"]
+            email=request.POST["email"],
         )
-        authenticate(request, 
-                     username=request.POST['username'], 
-                     password=request.POST["password"]
+        authenticate(
+            request,
+            username=request.POST["username"],
+            password=request.POST["password"],
         )
         return redirect("/")
     elif request.method == "GET":
         return render(
             request,
             "create_superuser.html",
-            context=make_context(title="Create Superuser")
+            context=make_context(title="Create Superuser"),
         )
     else:
         return HttpResponseNotAllowed(["GET", "POST"])
 
+
 def index(request):
     if no_users_exist():
         return redirect("/create_superuser/")
-    
+
     # require login
     if not request.user.is_authenticated:
         return redirect("/accounts/login/?next=/")
@@ -92,12 +110,13 @@ def index(request):
         request,
         "index.html",
         context=make_context(
-            title="Your Console", 
+            title="Your Console",
             run_file_status=run_file_status(),
             email=request.user.email,
             name=request.user.username,
-        )
+        ),
     )
+
 
 @login_required
 def logout_view(request):
@@ -107,33 +126,34 @@ def logout_view(request):
 
 @login_required
 def history(request):
-    return render(
-        request,
-        "history.html",
-        context=make_context(title="Your History")
-    )
+    return render(request, "history.html", context=make_context(title="Your History"))
+
 
 @login_required
 def shutdown_view(request):
     shutdown()
     return redirect("/")
 
+
 @login_required
 def start_view(request):
     start()
     return redirect("/")
 
+
 def redirect_to_index(request):
     return redirect("/")
 
+
 routes = [
-    ('', index), 
-    ('history/', history),
-    ('shutdown/', shutdown_view),
-    ('start/', start_view),
-    ('create_superuser/', create_super_user_view),
-    ('accounts/profile/', redirect_to_index),
-    ('about/', about),
-    ('logout/', logout_view),
+    ("", index),
+    ("history/", history),
+    ("shutdown/", shutdown_view),
+    ("start/", start_view),
+    ("create_superuser/", create_super_user_view),
+    ("accounts/profile/", redirect_to_index),
+    ("about/", about),
+    ("logout/", logout_view),
+    ("file/", download_file),
     # ('favicon.ico', favicon),
 ]
