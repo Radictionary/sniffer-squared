@@ -8,7 +8,7 @@ type PacketStruct struct {
 	Length       int    `json:"length"`
 	PacketNumber int    `json:"packetNumber"`
 	PacketDump   string `json:"packetDump"`
-	PacketData []byte `json:"packetData"`
+	PacketData string `json:"packetData"`
 	Time         string `json:"time"`
 	Err          string `json:"err"`
 	Saved        bool   `json:"saved"`

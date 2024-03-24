@@ -3,4 +3,18 @@
 <h1 class="text-2xl">History</h1>
 <h1 class="text-xl">Start the background process to give realtime packet updates</h1>
 
+{% if error %}
+    <p class="text-red-500">Error retrieving packet information: {{ error }}</p>
+{% else %}
+    {% if history %}
+        {% for packet in history %}
+            <p>{{ packet.packetNumber }} - {{ packet.safety }}</p>
+        {% endfor %}
+    {% else %}
+        <p>Timeout occurred retrieving packet information.</p>
+    {% endif %}
+{% endif %}
+
+
+
 {% endblock content %}

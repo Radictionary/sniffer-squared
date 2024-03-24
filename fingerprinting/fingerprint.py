@@ -1,11 +1,11 @@
 from scapy.all import *
-from pickledsocks import jsoncks
 import socket
 import ja3
 import subprocess
 import ast
 import asyncio
 import websockets
+import json
 
 
 
@@ -35,8 +35,13 @@ def get_ip_address():
     return hostname, ip_address
 
 #get the fingerprint from the packet
-def generate_fingerprint(file):
-    return run("ja3 --json packet_pool/test.pcap")
+def generate_fingerprint(raw_packet_data):
+    # Write the raw packet data to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(raw_packet_data)
+    
+    command = "ja3", " --json" + " -s /fingerprinting/" + str(temp_file)
+    return run(command)
 
 async def receive_data():
     uri = "ws://localhost:3957/packets"  # Replace this with the URL of your WebSocket server
@@ -49,15 +54,15 @@ async def receive_data():
             # Process the received message
             process_data(message)
 
+
 def process_data(message):
     # Your data processing logic here
-    print("Received:", message)
+    message_dict = json.loads(message)["Message"]
+    print("Received:", message_dict)
+    packet_id, packet_data = message_dict["packetNumber"], message_dict["packetData"]
+    print("packet data", packet_data)
 
-def main():
-    # Start receiving data
-    asyncio.run(receive_data())
-
-    packets = ast.literal_eval(generate_fingerprint())
+    packets = ast.literal_eval(generate_fingerprint(packet_data))
     
     good_hashes = open("fingerprinting/good_ja3_hashes.txt", "r")
 
@@ -74,5 +79,9 @@ def main():
             packet_info = str(packet_info)[1:-1].split(",")
             for info in packet_info:
                 print(info)
+
+def main():
+    # Start receiving data
+    asyncio.run(receive_data())
                  
 main()
