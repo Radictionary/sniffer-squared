@@ -197,3 +197,9 @@ loaded_model = load('traffic_analysis/xgboost_model.joblib')
 # Now you can use the loaded model to make predictions
 predictions = loaded_model.predict(perstest)
 print(predictions)
+
+for prediction in predictions:
+    if prediction:
+        print("unsafe")
+    else:
+        print('safe')
