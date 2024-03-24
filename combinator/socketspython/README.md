@@ -11,12 +11,13 @@ of course non-python processes cannot use `pickle`.
 Here's the code, an overview of the important functions:
 
 ```python
-python_make_server = partial(make_server, pickle)
-python_send = partial(send, pickle)
+class picklesocks:
+    python_make_server = partial(make_server, pickle)
+    python_send = partial(send, pickle)
 
-
-json_make_server = partial(make_server, json)
-json_send = partial(send, json)
+class jsoncks:
+    make_server = partial(make_server, json)
+    send = partial(send, json)
 ```
 
 # Simple test program:
@@ -24,7 +25,8 @@ json_send = partial(send, json)
 ```python
 
 import sys
-import pickledsocks
+
+from pickledsocks import jsoncks
 
 is_server = sys.argv[1].strip() == 'y'
 
@@ -33,7 +35,7 @@ def get(data):
     return "I got your dataif is_server:
 
 if is_server:
-    asyncio.run(module.json_make_server(get, 3952))
+    asyncio.run(jsoncks.make_server(get, 3952))
 else:
-    asyncio.run(module.json_send("Hi server from client!", 3952))
+    asyncio.run(jsoncks.send("Hi server from client!", 3952))
 ```
