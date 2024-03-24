@@ -59,7 +59,7 @@ async def main():
         picklesocks.make_server(safety_handler("ai"),          3954),
         picklesocks.make_server(safety_handler("dns"),         3955),
         picklesocks.make_server(safety_handler("arp"),         3956),
-        picklesocks.make_server(send_to_backend_server, 3957),
+        picklesocks.make_server(send_to_backend_server, 3952),
         picklesocks.make_server(whitelist_server_handler, 3958),
         packet_generator(),
     )
