@@ -93,7 +93,9 @@ def index(request):
         "index.html",
         context=make_context(
             title="Your Console", 
-            run_file_status=run_file_status()
+            run_file_status=run_file_status(),
+            email=request.user.email,
+            name=request.user.username,
         )
     )
 
