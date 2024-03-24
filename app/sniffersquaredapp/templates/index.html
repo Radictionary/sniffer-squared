@@ -1,20 +1,75 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container m-5 p-3 border rounded">
-        <h1>Sniffer Squared </h1>
-        <hr>
-        <p>(PLACEHOLDER TEXT)</p>
-        <p>Sniffer Squared is a network sniffer detection platform that allows you to scan your network for network sniffers.</p>
-        <p>Network sniffers are tools that can be used to intercept and analyze network traffic. They can be used for legitimate purposes, such as network monitoring, or for malicious purposes, such as eavesdropping on sensitive information.</p>
-        <p>Sniffer Squared can help you detect network sniffers on your network and take action to protect your data.</p>
+<section class="p-5 bg-gray-400">
+    <div class="m-5 p-3 rounded">
+        <h1 class="text-6xl py-4">Sniffer Squared <span class="font-bold">Dashboard</span></h1>
+        <!-- <p>Sniffer Squared is a network sniffer detection platform that allows you to scan your network for network
+            sniffers.</p>
+        <p>Network sniffers are tools that can be used to intercept and analyze network traffic. They can be used for
+            legitimate purposes, such as network monitoring, or for malicious purposes, such as eavesdropping on
+            sensitive
+            information.</p>
+        <p>Sniffer Squared can help you detect network sniffers on your network and take action to protect your data.
+        </p> -->
     </div>
-    {% if run_file_status %}
-        <!-- button to turn off -->
-        <a href="/shutdown/" class="btn-lg btn btn-block btn-danger">Stop Background Network Scan</a>
-    {% else %}
-        <!-- button to turn on -->
-        <a href="/start/" class="btn-lg btn-block btn btn-primary">Begin Background Network Scan</a>
-    {% endif %}
-{% endblock content %}
+    <div class="relative top-4" style="cursor: crosshair;">
+        <button id="scanAction" class="ml-8 relative top-10 p-5 rounded-xl text-xl mr-5">
+            Loading Background Scan Status
+        </button>
+        <a class="ml-8 relative top-10 px-5 py-4 bg-gray-300 rounded-xl text-xl">Overall: <span
+                class="text-gray-900">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">AI analysis: <span
+                class="text-gray-600">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">DNS spoofing: <span
+                class="text-gray-600">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">ARP spoofing: <span
+                class="text-gray-600">safe</span></a>
+        <a class="ml-8 relative top-10 px-5 py-3 bg-gray-100 rounded-xl text-xl">TLS/SSL fingerprinting: <span
+                class="text-gray-600">safe</span></a>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const scanAction = document.getElementById('scanAction');
+            let runFileStatus = "{{ run_file_status }}" == "True";
+            console.log("it is:", runFileStatus)
+            if (runFileStatus) {
+                scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-red-300"
+                scanAction.innerText = "Stop Background Scan Process"
+            } else {
+                scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-blue-300"
+                scanAction.innerText = "Start Background Scan Process"
+            }
+            if (scanAction) {
+                scanAction.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    let url = runFileStatus ? "/shutdown/" : "/start";
+                    scanAction.style.cursor = "wait"
+                    document.body.style.cursor = "wait"
+                    fetch(url)
+                        .then(response => {
+                            if (response.ok) {
+                                scanAction.style.cursor = "pointer"
+                                 document.body.style.cursor = "pointer"
+                                runFileStatus = !runFileStatus;
+                                console.log(runFileStatus ? 'Network scan stopped' : 'Background network scan started');
+                                if (runFileStatus) {
+                                    scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-red-300"
+                                    scanAction.innerText = "Stop Background Scan Process"
+                                } else {
+                                    scanAction.classList = "ml-8 relative top-10 p-5 rounded-xl text-xl mr-5 bg-blue-300"
+                                    scanAction.innerText = "Start Background Scan Process"
+                                }
+                            } else {
+                                console.error('Server responded with an error.');
+                            }
+                        })
+                        .catch(error => console.error('Error toggling network scan:', error));
+                });
+            }
 
+        });
+    </script>
+
+</section>
+{% endblock content %}

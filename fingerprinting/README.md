@@ -8,15 +8,15 @@ This Python script utilizes the Scapy library to analyze packet capture (pcap) f
 - Scapy library (`pip install scapy`)
 - JA3 library (`pip install ja3`)
 
+## TLS/SSL Fingerprinting
+TLS/SSL fingerprinting, also known as SSL fingerprinting or TLS handshake fingerprinting, is a technique used to identify or profile SSL/TLS implementations based on the characteristics of their handshake messages. The SSL/TLS handshake is an initial exchange of messages between a client (e.g., a web browser) and a server (e.g., a web server) that establishes a secure communication channel.
+
 ## Usage
 
 1. **Ensure Prerequisites**: Make sure you have the necessary prerequisites installed.
-2. **Update Pcap File Path**: Update the `pcap_file` variable with the path to your pcap file.
-3. **Run the Script**: Execute the following command in your terminal:
-    ```
-    python script_name.py
-    ```
-4. **View Output**: The script outputs information about the packets in the pcap file, including SSL/TLS fingerprint details.
+2. **Update Pcap File Path**: Update the `pcap_file` variable with the path to your pcap file. This is already streamlined. 
+3. **Run the Script**: The script is executed by the microservice handler.
+4. **View Output**: The script outputs information about the packets in the pcap file, including SSL/TLS fingerprint details to the frotn end.
 
 ## Functions
 
