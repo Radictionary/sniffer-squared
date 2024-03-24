@@ -1,11 +1,10 @@
+import asyncio
 from scapy.all import *
 import socket
 import ja3
 import subprocess
 import ast
-import asyncio
-import websockets
-import json
+from pickledsocks import jsoncks
 
 
 
@@ -35,53 +34,37 @@ def get_ip_address():
     return hostname, ip_address
 
 #get the fingerprint from the packet
-def generate_fingerprint(raw_packet_data):
-    # Write the raw packet data to a temporary file
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(raw_packet_data)
-    
-    command = "ja3", " --json" + " -s /fingerprinting/" + str(temp_file)
-    return run(command)
+def generate_fingerprint():
+    return run("ja3 --json packet_pool/packets.pcap")
 
-async def receive_data():
-    uri = "ws://localhost:3957/packets"  # Replace this with the URL of your WebSocket server
+async def main():
+    send_result = {"id":0}
+    packets = ast.literal_eval(generate_fingerprint())
 
-    async with websockets.connect(uri) as websocket:
-        print("Connected to WebSocket server")
-
-        # Continuously receive and process data from the WebSocket server
-        async for message in websocket:
-            # Process the received message
-            process_data(message)
-
-
-def process_data(message):
-    # Your data processing logic here
-    message_dict = json.loads(message)["Message"]
-    print("Received:", message_dict)
-    packet_id, packet_data = message_dict["packetNumber"], message_dict["packetData"]
-    print("packet data", packet_data)
-
-    packets = ast.literal_eval(generate_fingerprint(packet_data))
-    
     good_hashes = open("fingerprinting/good_ja3_hashes.txt", "r")
 
 
-    for packet_info in packets:
+    packet_info = packets[-1]
+
+
+    if packet_info["ja3"].split(",")[-1].split("-")[0] == "0": # check if handshake
+    
         fingerprint = packet_info["ja3_digest"] #get the fingerprint from the packet
         if fingerprint not in good_hashes.read(): # check if the fingerprint is valid
-            print("\nNOT SAFE, here is information on it:")
-            packet_info = str(packet_info)[1:-1].split(",")
-            for info in packet_info:
-                print(info)
-        else:
-            print("\nSAFE, here is information on it:")
-            packet_info = str(packet_info)[1:-1].split(",")
-            for info in packet_info:
-                print(info)
+            ids = open("packet_pool/id.txt", "r")
+            send_result["id"] = ids.readlines()[-1].strip() #get correspondinf id
+            print(send_result)
+            print("NOT SAFE")
+            try:
+                await asyncio.wait_for(jsoncks.send(send_result, 3953), timeout=3)
+            
+            except asyncio.TimeoutError:
+                print("time out")
+            print("done did the send :3")
 
-def main():
-    # Start receiving data
-    asyncio.run(receive_data())
-                 
-main()
+
+async def mainloop():
+    while True:
+        await main()
+
+asyncio.run(mainloop())

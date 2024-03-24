@@ -7,7 +7,6 @@ import scapy.all as scapy
 import os
 from pickledsocks import jsoncks
 import asyncio
-import websockets
 
 
 # code to get MAC Address
@@ -32,8 +31,6 @@ def sniff(interface):
 # defining function to process sniffed packet
 def process_sniffed_packet(packet):
 # if it is an ARP packet and if it is an ARP Response
-	print("runnin")
-	print(type(packet))
 	if packet.haslayer(scapy.ARP) and packet[scapy.ARP].op == 2:
 
 	# originalmac will get old MAC whereas
@@ -41,22 +38,31 @@ def process_sniffed_packet(packet):
 		# responsemac will get response of the MAC
 		responsemac = packet[scapy.ARP].hwsrc
 		if originalmac == responsemac:
-			print("erm")
-		else:
-			print("ivan is short")
+			return True
+		return False
 
 
-# get packet data, and sniff
-async def receive_data():
-    uri = "ws://127.0.0.1:3957"
-    async with websockets.connect(uri) as websocket:
-        while True:
-            data = await websocket.recv()
-            print("Received:", data)
+async def main():
+	send_result = {"id":0}
+	packet = list(scapy.rdpcap("packet_pool/packets.pcap"))[-1]
+	
+	if process_sniffed_packet(packet):
+		ids = open("packet_pool/id.txt", "r")
+		send_result["id"] = ids.readlines()[-1].strip() #get correspondinf id
+		print(send_result)
+		print("NOT SAFE")
+		try:
+			await asyncio.wait_for(jsoncks.send(send_result, 3953), timeout=3)
+		
+		except asyncio.TimeoutError:
+			print("time out")
+		print("done did the send :3")
 
-# Start receiving data
-asyncio.run(receive_data())
 
-data = jsoncks.send("give data", 3957)
+async def mainloop():
+    while True:
+        await main()
+
+asyncio.run(mainloop())
 
 
