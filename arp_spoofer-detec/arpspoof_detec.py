@@ -52,7 +52,7 @@ async def main():
 		print(send_result)
 		print("NOT SAFE")
 		try:
-			await asyncio.wait_for(jsoncks.send(send_result, 3953), timeout=3)
+			await asyncio.wait_for(jsoncks.send(send_result, 3956), timeout=3)
 		
 		except asyncio.TimeoutError:
 			print("time out")
