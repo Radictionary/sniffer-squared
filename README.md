@@ -3,5 +3,6 @@
 ### Ports:
 
 * Main Django App: 8000
-* Tls Fingerprinting:
+* TlS/SSL Fingerprinting:
 * Packet Pool: 8001
+* Microservices Communication: 3952
